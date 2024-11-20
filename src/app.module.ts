@@ -13,11 +13,17 @@ import { DatabaseModule } from './database/database.module'
 import { RolesModule } from '@modules/roles/roles.module'
 import { ProfileModule } from '@modules/profile/profile.module'
 import { PaymentModule } from './modules/payment/payment.module'
+import { CacheModule } from '@nestjs/cache-manager'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
+
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60 * 60 * 60 * 7, // Time to cache in mseconds -- 30 minutes
+    }),
     DatabaseModule,
 
     AuthModule,

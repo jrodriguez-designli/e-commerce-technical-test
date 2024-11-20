@@ -1,8 +1,24 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, HttpCode, HttpStatus, Inject, Patch } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Patch,
+  SetMetadata,
+} from '@nestjs/common'
 import { CreateProductDto, QueryAllProductsDto, QueryOneProductDto, UpdateProductDto, ProductDto } from './dto'
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { PRODUCT_SERVICE } from '@commons/constants/service.constants'
 import { IProductService } from './interfaces/product-service.interface'
+import { Roles } from '@modules/auth/decorators/roles.decorator'
+import { RolesEnum } from '@modules/roles/interfaces/role.enum'
+import { IS_PUBLIC } from '@commons/constants/auth.constants'
 
 @ApiTags('products')
 @Controller('product')
@@ -11,7 +27,7 @@ export class ProductController {
     @Inject(PRODUCT_SERVICE)
     private readonly productService: IProductService,
   ) {}
-
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Post('create')
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'The product has been successfully created.' })
@@ -20,6 +36,7 @@ export class ProductController {
     return await this.productService.create(createProductDto)
   }
 
+  @SetMetadata(IS_PUBLIC, true)
   @Get('find-all')
   @ApiOperation({ summary: 'Retrieve all products' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Successfully retrieved products.' })
@@ -28,6 +45,7 @@ export class ProductController {
     return await this.productService.findAll(queryParams)
   }
 
+  @SetMetadata(IS_PUBLIC, true)
   @Get('find-one/:uuid')
   @ApiOperation({ summary: 'Retrieve a specific product by UUID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Product retrieved successfully.' })
@@ -37,6 +55,7 @@ export class ProductController {
     return await this.productService.findOne(queryParams)
   }
 
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Patch('update')
   @ApiOperation({ summary: 'Update a product by UUID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'The product has been successfully updated.' })
@@ -47,6 +66,7 @@ export class ProductController {
     return await this.productService.update(data)
   }
 
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Delete('delete/:uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a product by UUID' })

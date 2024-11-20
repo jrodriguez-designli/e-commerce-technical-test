@@ -81,7 +81,10 @@ export class AuthService {
   private getAccessToken(payload: GenerateAccessTokenDto): AccessDto {
     try {
       const { email, sub } = payload
+
       const accessToken = this.jwtService.sign(payload)
+
+      console.log('Access token:', accessToken)
 
       return { accessToken, sub, email }
     } catch (error) {
