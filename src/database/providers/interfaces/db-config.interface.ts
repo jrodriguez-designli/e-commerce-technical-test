@@ -8,4 +8,10 @@ export interface IDatabaseConfigAttributes {
   port: number
   dialect: Dialect | undefined
   logging: boolean
+  dialectOptions?: {
+    ssl?: {
+      require: boolean
+      rejectUnauthorized: boolean
+    }
+  }
 }

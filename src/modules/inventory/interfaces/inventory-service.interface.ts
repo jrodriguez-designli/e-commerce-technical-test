@@ -1,3 +1,4 @@
+import { Transaction } from 'sequelize'
 import { CreateInventoryDto, InventoryDto, QueryOneInventoryDto, UpdateInventoryDto } from '../dto'
 import { TransactionOperation } from './transaction-operation.enum'
 
@@ -39,7 +40,7 @@ export interface ICreateInventoryRecordService {
    * @throws UnprocessableEntityException if an inventory record already exists for the product.
    * @throws NotFoundException if the product is not found.
    */
-  createInventoryRecord(data: CreateInventoryDto): Promise<InventoryDto>
+  createInventoryRecord(data: CreateInventoryDto, trx?: Transaction): Promise<InventoryDto>
 }
 
 /**

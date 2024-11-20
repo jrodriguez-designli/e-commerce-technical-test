@@ -11,5 +11,5 @@ export class QueryOneRole {
   @ApiProperty()
   @IsOptional()
   @Transform(({ value }) => value === 'true')
-  readonly default?: string | boolean = false
+  readonly isDefault?: string | boolean = false
 }

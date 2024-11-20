@@ -13,6 +13,7 @@ import { CreateUserDto, QueryAllUsersDto, QueryOneUserDto, UpdateUserDto, UserDt
 import { plainToInstanceFunction } from '@commons/providers/transform-data/plain-to-instance.dto'
 import { IUserService } from './interfaces/user-service.interface'
 import { Role } from '@modules/roles/entities/roles.entity'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
 export class UserService implements IUserService {
@@ -21,6 +22,8 @@ export class UserService implements IUserService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: typeof User,
+
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(UserService.name)
   }
@@ -37,6 +40,8 @@ export class UserService implements IUserService {
 
       const createUser = await this.userRepository.create({ email })
 
+      this.eventEmitter.emit('Role.assignRoleUser', { userUuid: createUser.uuid })
+
       return plainToInstanceFunction(UserDto, createUser) as UserDto
     } catch (error) {
       this.logger.error(error)
@@ -46,17 +51,17 @@ export class UserService implements IUserService {
 
   async findAll(queryParams: QueryAllUsersDto): Promise<UserDto[]> {
     try {
-      const { limit, offset, order, ...rest } = queryParams
+      const { limit, offset, order } = queryParams
+
+      console.log('order', queryParams)
 
       const whereCondition = {
-        ...rest,
         deletedAt: null,
       }
 
       const users = await this.userRepository.findAll({
         limit,
         offset,
-        order,
         where: { ...whereCondition },
         include: [
           {

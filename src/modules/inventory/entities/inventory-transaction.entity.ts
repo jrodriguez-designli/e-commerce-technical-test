@@ -1,4 +1,14 @@
-import { Column, DataType, Model, Table, ForeignKey, BelongsTo, CreatedAt, UpdatedAt } from 'sequelize-typescript'
+import {
+  Column,
+  DataType,
+  Model,
+  Table,
+  ForeignKey,
+  BelongsTo,
+  CreatedAt,
+  UpdatedAt,
+  Index,
+} from 'sequelize-typescript'
 import { Product } from '@modules/product/entities/product.entity'
 import { TransactionOperation } from '../interfaces/transaction-operation.enum'
 
@@ -16,6 +26,7 @@ export class InventoryTransaction extends Model<InventoryTransaction> {
   @Column({ type: DataType.ENUM(...Object.values(TransactionOperation)), allowNull: false })
   operation: TransactionOperation
 
+  @Index //Index is used to create a unique index in the database
   @ForeignKey(() => Product)
   @Column({ type: DataType.INTEGER, allowNull: false })
   productId: number

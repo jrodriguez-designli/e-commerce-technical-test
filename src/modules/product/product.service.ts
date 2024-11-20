@@ -25,6 +25,7 @@ import { INVENTORY_SERVICE } from '@commons/constants/service.constants'
 import { IInventoryService } from '@modules/inventory/interfaces/inventory-service.interface'
 import { Inventory } from '@modules/inventory/entities/inventory.entity'
 import { TransactionOperation } from '@modules/inventory/interfaces/transaction-operation.enum'
+import { Transaction } from 'sequelize'
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -41,18 +42,22 @@ export class ProductService implements IProductService {
   }
 
   async create(data: CreateProductDto): Promise<ProductDto> {
+    let createdProduct: Product | null = null
+
     try {
       const { name, profileUuid, stock, stockMeasure } = data
 
       const profileId = await getIdAttribute(PROFILE_REPOSITORY, profileUuid)
 
-      const existingProduct = await this.productRepository.findOne({ where: { name, profileId, deletedAt: null } })
+      const existingProduct = await this.productRepository.findOne({
+        where: { name, profileId, deletedAt: null },
+      })
 
       if (existingProduct) {
         return plainToInstanceFunction(ProductDto, existingProduct) as ProductDto
       }
 
-      const createdProduct = await this.productRepository.create({ ...data, profileId })
+      createdProduct = await this.productRepository.create({ ...data, profileId })
 
       await this.inventoryService.createInventoryRecord({
         productUuid: createdProduct.uuid,
@@ -62,6 +67,12 @@ export class ProductService implements IProductService {
 
       return plainToInstanceFunction(ProductDto, createdProduct) as ProductDto
     } catch (error) {
+      // Manual rollback: Delete the product if it was created
+      if (createdProduct) {
+        this.logger.error('Rolling back created product:', createdProduct.id)
+        await createdProduct.destroy({ force: true })
+      }
+
       this.logger.error(error)
       throw new UnprocessableEntityException('An error occurred while creating the product: ' + error.message)
     }

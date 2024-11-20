@@ -25,11 +25,17 @@ export const databaseProviders = [
         port: parseInt(process.env.DB_PORT),
         dialect: (process.env.DB_DIALECT as Dialect) || 'postgres',
         logging: false,
+        dialectOptions: {
+          ssl: {
+            require: true, // Force SSL
+            rejectUnauthorized: false, // Avoid self signed certificate
+          },
+        },
       }
 
       const sequelize = new Sequelize(config)
 
-      sequelize.addModels([User, Auth, Role, RoleUser, Profile, Product, InventoryTransaction, Inventory, Order])
+      sequelize.addModels([User, Profile, Auth, Role, RoleUser, Product, InventoryTransaction, Inventory, Order])
 
       //await sequelize.sync()
       return sequelize
