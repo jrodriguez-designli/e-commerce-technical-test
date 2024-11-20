@@ -13,6 +13,7 @@ import { UpdateInventoryDto } from './dto/request/update-inventory.dto'
 import { TransactionOperation } from '@modules/inventory/interfaces/transaction-operation.enum'
 import { InventoryTransaction } from './entities/inventory-transaction.entity'
 import { IInventoryService } from './interfaces/inventory-service.interface'
+import { Transaction } from 'sequelize'
 
 @Injectable()
 export class InventoryService implements IInventoryService {
@@ -29,6 +30,8 @@ export class InventoryService implements IInventoryService {
   }
 
   async createInventoryRecord(data: CreateInventoryDto): Promise<InventoryDto> {
+    let newInventory: Inventory | null = null
+
     try {
       const { productUuid, initialStock, stockMeasure } = data
 
@@ -40,20 +43,25 @@ export class InventoryService implements IInventoryService {
 
       const productId = await getIdAttribute(PRODUCT_REPOSITORY, productUuid)
 
-      const newInventory = await this.inventoryRepository.create({
+      newInventory = await this.inventoryRepository.create({
         productId,
         stock: initialStock,
         stockMeasure,
       })
 
-      await this.inventoryTransactionRepository.create({
-        productId,
+      await this.createInventoryTransaction({
+        productUuid,
         quantity: initialStock,
         operation: TransactionOperation.ADD,
       })
 
       return plainToInstanceFunction(InventoryDto, newInventory) as InventoryDto
     } catch (error) {
+      // Manual rollback: Delete the inventary if it was created
+      if (newInventory) {
+        this.logger.error('Rolling back created product:', newInventory.id)
+        await newInventory.destroy()
+      }
       this.logger.error(error)
       throw new NotFoundException('There was an error creating the inventory record for the product: ' + error.message)
     }
@@ -121,17 +129,26 @@ export class InventoryService implements IInventoryService {
   }
 
   private async createInventoryTransaction(data: UpdateInventoryDto): Promise<void> {
+    let newTransaction: InventoryTransaction | null = null
     try {
       const { productUuid, quantity, operation } = data
 
       const productId = await getIdAttribute(PRODUCT_REPOSITORY, productUuid)
 
-      await this.inventoryTransactionRepository.create({
+      newTransaction = await this.inventoryTransactionRepository.create({
         productId,
         quantity,
         operation,
       })
+
+      //Simulate error to rollback TRXs
+      //throw new Error('Test error')
     } catch (error) {
+      // Manual rollback: Delete the transaction if it was created
+      if (newTransaction) {
+        this.logger.error('Rolling back created transaction:', newTransaction.id)
+        await newTransaction.destroy()
+      }
       this.logger.error(error)
       throw new NotFoundException('Inventory transaction not created')
     }

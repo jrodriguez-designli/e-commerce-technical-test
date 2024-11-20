@@ -10,6 +10,7 @@ import { plainToInstanceFunction } from '@commons/providers/transform-data/plain
 import { ROLE_REPOSITORY, ROLES_USER_REPOSITORY, USER_REPOSITORY } from '@commons/constants/entities.constants'
 import { RoleUser } from './entities/roles-user.entity'
 import { getIdAttribute } from '@commons/providers/generic-entity-resolver/entity-id-attribute.provider'
+import { OnEvent } from '@nestjs/event-emitter'
 
 @Injectable()
 export class RoleService implements IRoleService {
@@ -154,22 +155,16 @@ export class RoleService implements IRoleService {
     }
   }
 
+  @OnEvent('Role.assignRoleUser', { async: true, promisify: true })
   async assignUserRole(data: UserRoleDto): Promise<void> {
     try {
       const { roleUuid, userUuid } = data
 
-      let roleId: number
       let userId = await getIdAttribute(USER_REPOSITORY, userUuid)
 
-      let role: RoleDto
-
-      if (!roleUuid) {
-        role = await this.findOne({ default: true })
-        roleId = await getIdAttribute(ROLE_REPOSITORY, role.uuid)
-      }
-
-      role = await this.findOne({ uuid: roleUuid })
-      roleId = await getIdAttribute(ROLE_REPOSITORY, role.uuid)
+      const { id: roleId } = await this.roleRepository.findOne({
+        where: roleUuid ? { uuid: roleUuid } : { isDefault: true },
+      })
 
       await this.roleUserRepository.create({ roleId, userId })
     } catch (error) {
@@ -177,14 +172,4 @@ export class RoleService implements IRoleService {
       throw new UnprocessableEntityException(error)
     }
   }
-
-  // @OnEvent('Role.assignRoleUser', { async: true, promisify: true })
-  // async testEmmiter() {
-  //   try {
-  //     await this.roleRepository.create({ name: Date.toString(), description: 'test' })
-  //     this.logger.error('Role created') // Este log te indica que el rol fue creado
-  //   } catch (error) {
-  //     this.logger.error('Error creating role', error)
-  //   }
-  // }
 }

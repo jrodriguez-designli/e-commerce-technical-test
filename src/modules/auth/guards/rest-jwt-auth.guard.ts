@@ -44,7 +44,8 @@ export class RestJwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      const user = await this.userService.findOne(userPayload.sub)
+      const user = await this.userService.findOne({ uuid: userPayload.sub })
+
       const timeCache = 60 * 60 * 60 * 7 // Time to cache in mseconds -- 30 minutes
 
       await this.cacheManager.set(cacheKey, user, timeCache)

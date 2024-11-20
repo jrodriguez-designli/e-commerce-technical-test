@@ -24,7 +24,6 @@ export class Product extends Model<Product> {
   @Column({ type: DataType.INTEGER, autoIncrement: true })
   id: number
 
-  @Index //Index is used to create a unique index in the database
   @Unique
   @Column({ type: DataType.STRING, defaultValue: DataType.UUIDV4 })
   uuid: string

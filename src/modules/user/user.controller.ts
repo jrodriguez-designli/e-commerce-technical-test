@@ -26,8 +26,8 @@ export class UserController {
     return await this.userService.create(createUserDto)
   }
 
-  @Auth()
-  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+  //@Auth()
+  //@Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get all users with optional query parameters' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
