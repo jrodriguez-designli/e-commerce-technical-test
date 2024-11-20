@@ -1,0 +1,5 @@
+export { ProfileDto } from './responses/profile.dto'
+export { CreateProfileDto } from './requests/create-profile.dto'
+export { UpdateProfileDto } from './requests/update-profile.dto'
+export { QueryAllProfilesDto } from './requests/query-all-profile.dto'
+export { QueryOneProfileDto } from './requests/query-one-profile.dto'
