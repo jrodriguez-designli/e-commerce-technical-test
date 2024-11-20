@@ -7,7 +7,7 @@ import { PaymentServiceProvider } from './providers/payment-service.provider'
 import { QueueModule } from '@commons/providers/queue-service/queue.module'
 
 @Module({
-  imports: [QueueModule],
+  imports: [QueueModule, OrderModule],
   providers: [PaymentServiceProvider, PaymentProcessor],
   exports: [PaymentServiceProvider],
 })

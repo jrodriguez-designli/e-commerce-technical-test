@@ -18,8 +18,7 @@ import { TransactionOperation } from '@modules/inventory/interfaces/transaction-
 import { CreateOrderDto, OrderDto, QueryAllOrderDto, QueryOneOrderDto } from './dto'
 import { IOrderService } from './interfaces/order-service.interface'
 import { LazyModuleLoader } from '@nestjs/core'
-import { PaymentModule } from '@modules/payment/payment.module'
-import { PaymentService } from '@modules/payment/payment.service'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
 @Injectable()
 export class OrderService implements IOrderService {
@@ -35,7 +34,7 @@ export class OrderService implements IOrderService {
     @Inject(INVENTORY_SERVICE)
     private readonly inventoryService: IInventoryService,
 
-    private readonly lazyModuleLoader: LazyModuleLoader,
+    private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(OrderService.name)
   }
@@ -69,22 +68,12 @@ export class OrderService implements IOrderService {
       status: OrderStatus.PENDING,
     })
 
-    await this.lazyCheckPreferences(createdOrder.uuid, totalChargesAmount)
+    this.eventEmitter.emit('payment.init', {
+      uuid: createdOrder.uuid,
+      totalChargesAmount,
+    })
 
     return plainToInstanceFunction(OrderDto, createdOrder) as OrderDto
-  }
-
-  private async lazyCheckPreferences(orderUuid, totalChargesAmount): Promise<void> {
-    try {
-      const moduleRef = await this.lazyModuleLoader.load(() => PaymentModule)
-
-      const paymentService = moduleRef.get(PAYMENT_SERVICE)
-
-      await paymentService.initiatePayment(orderUuid, totalChargesAmount)
-    } catch (error) {
-      this.logger.error(error)
-      throw new UnprocessableEntityException(error)
-    }
   }
 
   async findOneOrder(queryParam: QueryOneOrderDto): Promise<OrderDto> {
@@ -152,18 +141,34 @@ export class OrderService implements IOrderService {
     }
   }
 
-  async updateOrder(orderId: string, status: OrderStatus): Promise<void> {
-    await this.orderRepository.update({ status }, { where: { uuid: orderId } })
+  @OnEvent('order.update')
+  async updateOrder(data): Promise<void> {
+    try {
+      const { order, status } = data
+      console.log(order)
+      await this.orderRepository.update({ status }, { where: { uuid: order?.uuid } })
+    } catch (error) {
+      this.logger.error('Error updating order: ' + error.message)
+      throw new UnprocessableEntityException('There is an error in the request: ' + error)
+    }
   }
 
-  async restoreInventory(orderId: string): Promise<void> {
-    const order = await this.orderRepository.findOne({ where: { uuid: orderId }, include: [Product] })
-    if (order) {
-      await this.inventoryService.updateInventory({
-        productUuid: order.product.uuid,
-        quantity: order.productQuantity,
-        operation: TransactionOperation.ADD,
-      })
+  @OnEvent('order.restore')
+  async restoreInventory(data): Promise<void> {
+    try {
+      const { order } = data
+      const orderRes = await this.orderRepository.findOne({ where: { uuid: order?.uuid }, include: [Product] })
+
+      if (orderRes) {
+        await this.inventoryService.updateInventory({
+          productUuid: orderRes.product.uuid,
+          quantity: orderRes.productQuantity,
+          operation: TransactionOperation.ADD,
+        })
+      }
+    } catch (error) {
+      this.logger.error('Error restoring inventory: ' + error.message)
+      throw new UnprocessableEntityException('There is an error in the request: ' + error)
     }
   }
 }

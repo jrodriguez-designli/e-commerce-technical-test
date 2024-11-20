@@ -18,6 +18,7 @@ import { IProfileService } from './interfaces/profile-service.interface'
 import { PROFILE_SERVICE } from '@commons/constants/service.constants'
 import { Roles } from '@modules/auth/decorators/roles.decorator'
 import { RolesEnum } from '@modules/roles/interfaces/role.enum'
+import { Auth } from '@modules/auth/decorators/auth.decorator'
 
 @ApiTags('Profiles')
 @Controller('profile')
@@ -29,6 +30,7 @@ export class ProfileController {
     private readonly profileService: IProfileService,
   ) {}
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Create a new profile' })
   @ApiResponse({ status: 201, description: 'Profile successfully created', type: ProfileDto })
@@ -44,6 +46,7 @@ export class ProfileController {
     }
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get all profiles with pagination' })
   @ApiResponse({ status: 200, description: 'List of profiles', type: [ProfileDto] })
@@ -61,6 +64,7 @@ export class ProfileController {
     }
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get a profile by UUID' })
   @ApiResponse({ status: 200, description: 'Profile found', type: ProfileDto })
@@ -76,6 +80,7 @@ export class ProfileController {
     }
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Update an existing profile' })
   @ApiResponse({ status: 200, description: 'Profile updated', type: ProfileDto })
@@ -91,6 +96,7 @@ export class ProfileController {
     }
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Delete a profile by UUID' })
   @ApiResponse({ status: 200, description: 'Profile deleted', type: ProfileDto })

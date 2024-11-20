@@ -1,24 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Inject,
-  UseGuards,
-  SetMetadata,
-} from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Inject } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger'
 import { CreateUserDto, QueryAllUsersDto, QueryOneUserDto, UpdateUserDto, UserDto } from './dto'
 import { IUserService } from './interfaces/user-service.interface'
 import { USER_SERVICE } from '@commons/constants/service.constants'
-import { Auth } from '@modules/auth/decorators/auth.decorator'
 import { RolesEnum } from '@modules/roles/interfaces/role.enum'
-import { IS_PUBLIC } from '@commons/constants/auth.constants'
 import { Roles } from '@modules/auth/decorators/roles.decorator'
+import { Auth } from '@modules/auth/decorators/auth.decorator'
 
 @ApiTags('Users') // Swagger tag for grouping endpoints under 'Users'
 @Controller('user')
@@ -28,6 +15,8 @@ export class UserController {
     private readonly userService: IUserService,
   ) {}
 
+  @Auth()
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: UserDto })
   @ApiResponse({ status: 409, description: 'User with this email already exists.' })
@@ -37,6 +26,8 @@ export class UserController {
     return await this.userService.create(createUserDto)
   }
 
+  @Auth()
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get all users with optional query parameters' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
@@ -48,6 +39,7 @@ export class UserController {
     return await this.userService.findAll(queryParams)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get a specific user by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the user to find', required: true })
@@ -59,6 +51,7 @@ export class UserController {
     return await this.userService.findOne(queryParams)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Update user information' })
   @ApiBody({ type: UpdateUserDto })
@@ -71,6 +64,7 @@ export class UserController {
     return await this.userService.update(updateUserDto)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Delete a user by UUID' })
   @ApiParam({ name: 'uuid', description: 'The UUID of the user to delete', required: true })
