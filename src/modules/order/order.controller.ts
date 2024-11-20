@@ -5,6 +5,7 @@ import { OrderService } from './order.service'
 import { ORDER_SERVICE } from '@commons/constants/service.constants'
 import { Roles } from '@modules/auth/decorators/roles.decorator'
 import { RolesEnum } from '@modules/roles/interfaces/role.enum'
+import { Auth } from '@modules/auth/decorators/auth.decorator'
 
 @ApiTags('Orders')
 @Controller('order')
@@ -14,6 +15,7 @@ export class OrderController {
     private readonly orderService: OrderService,
   ) {}
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Create a new order' })
   @ApiResponse({ status: 201, description: 'Order successfully created', type: OrderDto })
@@ -23,6 +25,7 @@ export class OrderController {
     return await this.orderService.createOrder(createOrderDto)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Find an order by UUID' })
   @ApiResponse({ status: 200, description: 'Order found', type: OrderDto })
@@ -33,6 +36,7 @@ export class OrderController {
     return await this.orderService.findOneOrder(params)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Find all orders for a specific profile' })
   @ApiResponse({ status: 200, description: 'List of orders found', type: [OrderDto] })

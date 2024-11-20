@@ -19,6 +19,7 @@ import { IProductService } from './interfaces/product-service.interface'
 import { Roles } from '@modules/auth/decorators/roles.decorator'
 import { RolesEnum } from '@modules/roles/interfaces/role.enum'
 import { IS_PUBLIC } from '@commons/constants/auth.constants'
+import { Auth } from '@modules/auth/decorators/auth.decorator'
 
 @ApiTags('products')
 @Controller('product')
@@ -27,6 +28,8 @@ export class ProductController {
     @Inject(PRODUCT_SERVICE)
     private readonly productService: IProductService,
   ) {}
+
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Post('create')
   @ApiOperation({ summary: 'Create a new product' })
@@ -55,6 +58,7 @@ export class ProductController {
     return await this.productService.findOne(queryParams)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Patch('update')
   @ApiOperation({ summary: 'Update a product by UUID' })
@@ -66,6 +70,7 @@ export class ProductController {
     return await this.productService.update(data)
   }
 
+  @Auth()
   @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Delete('delete/:uuid')
   @HttpCode(HttpStatus.NO_CONTENT)

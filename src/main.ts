@@ -19,7 +19,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build()
 
-  app.useGlobalGuards(app.get(RestJwtAuthGuard), new RolesGuard(reflector))
+  //app.useGlobalGuards(new RolesGuard(reflector))
 
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
