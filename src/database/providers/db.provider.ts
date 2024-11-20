@@ -31,7 +31,7 @@ export const databaseProviders = [
 
       sequelize.addModels([User, Auth, Role, RoleUser, Profile, Product, InventoryTransaction, Inventory, Order])
 
-      await sequelize.sync()
+      //await sequelize.sync()
       return sequelize
     },
   },

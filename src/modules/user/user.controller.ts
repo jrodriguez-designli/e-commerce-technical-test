@@ -1,8 +1,24 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Inject } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  SetMetadata,
+} from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger'
 import { CreateUserDto, QueryAllUsersDto, QueryOneUserDto, UpdateUserDto, UserDto } from './dto'
 import { IUserService } from './interfaces/user-service.interface'
 import { USER_SERVICE } from '@commons/constants/service.constants'
+import { Auth } from '@modules/auth/decorators/auth.decorator'
+import { RolesEnum } from '@modules/roles/interfaces/role.enum'
+import { IS_PUBLIC } from '@commons/constants/auth.constants'
+import { Roles } from '@modules/auth/decorators/roles.decorator'
 
 @ApiTags('Users') // Swagger tag for grouping endpoints under 'Users'
 @Controller('user')
@@ -32,6 +48,7 @@ export class UserController {
     return await this.userService.findAll(queryParams)
   }
 
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Get a specific user by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the user to find', required: true })
   @ApiResponse({ status: 200, description: 'User found successfully.', type: UserDto })
@@ -42,6 +59,7 @@ export class UserController {
     return await this.userService.findOne(queryParams)
   }
 
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Update user information' })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully.', type: UserDto })
@@ -53,6 +71,7 @@ export class UserController {
     return await this.userService.update(updateUserDto)
   }
 
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @ApiOperation({ summary: 'Delete a user by UUID' })
   @ApiParam({ name: 'uuid', description: 'The UUID of the user to delete', required: true })
   @ApiResponse({ status: 204, description: 'User deleted successfully.' })

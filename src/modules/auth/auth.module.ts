@@ -8,18 +8,21 @@ import { JWT_EXPIRATION, JWT_SECRET, JWT_STRATEGY } from '@commons/constants/aut
 import { BcryptProvider } from '@commons/providers/hasher/provider/bcrypt-provider.provider'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { AuthProvider } from './entities/providers/auth-entity.provider'
+import { RestJwtAuthGuard } from './guards/rest-jwt-auth.guard'
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: JWT_STRATEGY }),
+
     JwtModule.register({
       secret: JWT_SECRET,
       signOptions: { expiresIn: JWT_EXPIRATION },
     }),
+
     UserModule,
   ],
-  providers: [AuthService, JwtStrategy, BcryptProvider, ...AuthProvider],
+  providers: [AuthService, RestJwtAuthGuard, JwtStrategy, BcryptProvider, ...AuthProvider],
   controllers: [AuthController],
-  exports: [PassportModule, JwtModule],
+  exports: [PassportModule, JwtModule, RestJwtAuthGuard],
 })
 export class AuthModule {}

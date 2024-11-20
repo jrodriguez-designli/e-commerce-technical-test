@@ -1,7 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, Get } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, Get, SetMetadata } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { AccessDto, AuthRequestDto } from './dto'
+import { IS_PUBLIC } from '@commons/constants/auth.constants'
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -10,6 +11,7 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
+  @SetMetadata(IS_PUBLIC, true)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: AuthRequestDto })
   @ApiResponse({ status: 201, description: 'User registered successfully', type: AccessDto })
@@ -20,6 +22,7 @@ export class AuthController {
     return this.authService.register(authRequestDto)
   }
 
+  @SetMetadata(IS_PUBLIC, true)
   @ApiOperation({ summary: 'Log in a user' })
   @ApiBody({ type: AuthRequestDto })
   @ApiResponse({ status: 200, description: 'User logged in successfully', type: AccessDto })
