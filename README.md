@@ -20,3 +20,6 @@ AUTH_SECRET_KEY=secret1234567
 2. Run => npm run start or npm run start:dev
 
 3. We are using sequalize as ORM, so Sequelize is more complex and less intuitive for strict typing and relationships. Prisma simplifies complex queries and migrations, which can be more tedious in Sequelize. And also don't have Connect feature, to make relationships easier.
+
+4. Postman Collection: 
+https://www.postman.com/bloodknot/workspace/public/collection/33876739-60a04e9e-e368-44f6-ae73-f9697f6ca3bf?action=share&creator=33876739&active-environment=33876739-eb0a91f0-56b4-44a0-be7a-a9ac31865b79
